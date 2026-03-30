@@ -158,7 +158,7 @@ def get_params():
     parser.add_argument("--train_seed", type = int, default = 3456,
                         help = "the training random-seed")  # 训练随机种子
     
-    parser.add_argument("--train_episodes", type = int, default =3000,
+    parser.add_argument("--train_episodes", type = int, default =5000,
                         help = "the number of training episodes")  # 训练轮数（episodes）
 
     parser.add_argument("--train_time_slots", type = int, default = 200,
@@ -186,11 +186,11 @@ def get_params():
     parser.add_argument("--lamda", type = float, default = 0.90,
                         help = "the param about GAE")  # GAE 的 lambda 参数
     
-    parser.add_argument("--v_lr", type = float, default = 1e-4,
-                        help = "the learning-rate of value network")  # value 网络学习率
+    parser.add_argument("--v_lr", type = float, default = 5e-5,
+                        help = "the learning-rate of value network")  # value 网络学习率（略降以提升稳定性）
     
-    parser.add_argument("--p_lr", type = float, default = 5e-5,
-                        help = "the learning-rate of policy network")  # policy 网络学习率
+    parser.add_argument("--p_lr", type = float, default = 2.5e-5,
+                        help = "the learning-rate of policy network")  # policy 网络学习率（略降以提升稳定性）
     
     parser.add_argument("--adam_eps", type = float, default = 1e-5,
                         help = "the param about Adam optimizer")  # Adam 优化器的 eps 参数
@@ -204,8 +204,8 @@ def get_params():
     parser.add_argument("--min_p_lr", type = float, default = 1e-8,        
                         help = "the minimal learning-rate of policy network")  # policy 网络最小学习率
     
-    parser.add_argument("--decay_fac", type = float, default = 0.998,  
-                        help = "the param about learning-rate decay")  # 学习率衰减因子
+    parser.add_argument("--decay_fac", type = float, default = 0.995,  
+                        help = "the param about learning-rate decay")  # 学习率衰减因子（稍大，提高后期稳定性）
     
     parser.add_argument("--use_obs_scaling", type = bool, default = True, 
                         help = "whether to use observation scaling")  # 是否对观测进行缩放
@@ -213,8 +213,8 @@ def get_params():
     parser.add_argument("--load_scales", type = bool, default = False, 
                         help = "whether to load observation scaling params")  # 是否加载已保存的观测缩放参数
     
-    parser.add_argument("--use_reward_scaling", type = bool, default = False, 
-                        help = "whether to use reward scaling")  # 是否使用奖励缩放
+    parser.add_argument("--use_reward_scaling", type = bool, default = True, 
+                        help = "whether to use reward scaling")  # 是否使用奖励缩放（开启有助于平滑训练）
     
     parser.add_argument("--use_grad_clip", type = bool, default = True, 
                         help = "whether to use gradient clip")  # 是否对梯度进行裁剪
@@ -229,12 +229,12 @@ def get_params():
                         help = "whether to use gradient clip") 
     parser.add_argument("--p_clip", type = float, default = 0.05,  
                         help = "the param about ppo clip")  # PPO 的裁剪参数
-    parser.add_argument("--enty_coef", type = float, default = 0.002,   
-                        help = "the coefficient about policy's entropy")  # 策略熵项系数
+    parser.add_argument("--enty_coef", type = float, default = 0.001,   
+                        help = "the coefficient about policy's entropy")  # 策略熵项系数（减弱过强探索）
     parser.add_argument("--enty_coef_min", type = float, default = 0.001,   
                         help = "the minimal coefficient about policy's entropy")  # 策略熵项最小系数
-    parser.add_argument("--enty_coef_decay", type = float, default = 0.995,   
-                        help = "the decay factor about policy's entropy coefficient")  # 策略熵项系数衰减因子
+    parser.add_argument("--enty_coef_decay", type = float, default = 0.99,   
+                        help = "the decay factor about policy's entropy coefficient")  # 策略熵项系数衰减因子（稍快衰减）
    
    
     parser.add_argument("--save_freq", type = int, default = 50, 
