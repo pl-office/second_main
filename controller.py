@@ -60,7 +60,9 @@ class Controller:
         checkpoint_path = self._get_checkpoint_path()
         if not os.path.exists(checkpoint_path):
             return 1
-        checkpoint = torch.load(checkpoint_path, map_location="cpu")
+        # PyTorch 2.6 之后 torch.load 默认 weights_only=True，会限制反序列化内容，
+        # 这里我们加载的是自己保存的完整 checkpoint，显式关闭 weights_only 限制。
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
         start_episode = checkpoint.get("next_episode", 1)
         self.joint_reward_col = checkpoint.get("joint_reward_col", [])
         self.mec_rewards_col = checkpoint.get("mec_rewards_col", [])
