@@ -33,6 +33,9 @@ class Rollout:  # 定义 Rollout 类，负责训练和评估流程
         self.save_freq = params.save_freq  # 保存频率
         self.results_dir = params.results_dir  # 结果保存目录
         self.weights_dir = params.weights_dir  # 权重保存目录
+        # 记录本次程序运行以来经历的训练 episode 数（仅在训练模式下使用），
+        # 避免使用全局 e_id 导致从检查点恢复时经验池尚未填满就开始训练。
+        self.episode_counter = 0
       
 
         # obs scaling
@@ -100,6 +103,9 @@ class Rollout:  # 定义 Rollout 类，负责训练和评估流程
     def run(self, e_id):  # 运行一轮训练或评估
         # reset
         self.reset()  # 重置统计指标
+        # 仅在训练模式下统计“本次程序运行中的 episode 编号”
+        if not self.evaluate:
+            self.episode_counter += 1
         # 检查是否有检查点可以加载（只在训练模式下，且仅第一轮）
         if not self.evaluate and self.use_reward_scaling:
             self.reward_scaling.reset()
@@ -178,7 +184,9 @@ class Rollout:  # 定义 Rollout 类，负责训练和评估流程
         # 检查是否有检查点可以加载（只在训练模式下）
         if not self.evaluate:
             # train
-            if e_id % self.train_freq == 0:
+            # 使用本次运行中的 episode 计数，而不是全局 e_id，
+            # 确保每次调用 train_nets 之前，ReplayBuffer 都已经被完整填充 train_freq 个 episode。
+            if self.episode_counter % self.train_freq == 0:
                 self.cld_agent.train_nets(self.replay_buffer)  # 训练云端智能体
 
                 for i in range(self.mec_num):
